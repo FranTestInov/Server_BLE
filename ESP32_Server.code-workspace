@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "ESP32_Server",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"string": "cpp"
+		}
+	}
+}
