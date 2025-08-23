@@ -14,7 +14,7 @@
 // --- OBJETOS GLOBALES DE LOS MÓDULOS ---
 // Creamos una instancia para cada manager que controlará una parte del sistema.
 BLEManager bleManager;
-// SensorManager sensorManager;
+SensorManager sensorManager;
 // CalibrationManager calibrationManager;
 
 /**
@@ -27,7 +27,7 @@ void setup() {
 
     // Inicializamos cada uno de nuestros managers
     bleManager.init();
-    // sensorManager.init();
+    sensorManager.init();
     // calibrationManager.init();
     
     Serial.println("Sistema inicializado y listo.");
@@ -47,22 +47,16 @@ void loop() {
     if (millis() - lastUpdateTime >= UPDATE_INTERVAL_MS) {
         lastUpdateTime = millis(); // Actualizamos el tiempo del último envío
 
-        // --- 1. GENERACIÓN DE DATOS ALEATORIOS ---
-        // Generamos números dentro de rangos realistas para cada sensor.
-        // Para los floats, generamos un entero y lo dividimos para obtener decimales.
-        float temp = random(2000, 2500) / 100.0; // Rango: 20.00 - 24.99 °C
-        float hum = random(4000, 6000) / 100.0;  // Rango: 40.00 - 59.99 %
-        float pres = random(100000, 102000) / 100.0; // Rango: 1000.00 - 1019.99 hPa
-        int co2 = random(400, 2500);             // Rango: 400 - 2499 ppm
+        SensorData data = sensorManager.readAllSensors();
 
-        // Mostramos en la consola los valores que estamos a punto de enviar
+        // Mostramos en la consola los valores reales
         Serial.printf("Enviando -> Temp: %.2f C, Hum: %.2f %%, Pres: %.2f hPa, CO2: %d ppm\n",
-                      temp, hum, pres, co2);
+                       data.temperature, data.humidity, data.pressure, data.co2);
 
         // --- Actualización del Servidor BLE ---
         // Le pasamos los datos al BLEManager para que los envíe
         if (bleManager.isDeviceConnected()) {
-            bleManager.updateSensorValues(temp, hum, pres, co2);
+            bleManager.updateSensorValues(data.temperature, data.humidity, data.pressure, data.co2);
         }
 
         // --- Lógica de Calibración (próximamente en CalibrationManager) ---
