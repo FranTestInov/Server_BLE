@@ -31,6 +31,32 @@ class MyServerCallbacks : public BLEServerCallbacks {
     }
 };
 
+// --- Variable para almacenar el comando recibido ---
+String calibrationCommand = "";
+
+/**
+ * @class MyCharacteristicCallbacks
+ * @brief Gestiona los eventos de escritura en una característica.
+ */
+class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
+    /**
+     * @brief Se ejecuta cuando un cliente BLE escribe en la característica.
+     * @param pCharacteristic Puntero a la característica que fue escrita.
+     */
+    void onWrite(BLECharacteristic *pCharacteristic) {
+        std::string value = pCharacteristic->getValue();
+
+        if (value.length() > 0) {
+            calibrationCommand = ""; // Limpiamos el comando anterior
+            for (int i = 0; i < value.length(); i++) {
+                calibrationCommand += value[i];
+            }
+            Serial.print("Comando de calibración recibido: ");
+            Serial.println(calibrationCommand);
+        }
+    }
+};
+
 BLEManager::BLEManager() {
     // El constructor puede estar vacío por ahora
     pServer = nullptr;
@@ -55,9 +81,8 @@ void BLEManager::init() {
     pCharacteristicPres = pService->createCharacteristic(CHARACTERISTIC_UUID_PRES, BLECharacteristic::PROPERTY_READ);
     pCharacteristicHum = pService->createCharacteristic(CHARACTERISTIC_UUID_HUM, BLECharacteristic::PROPERTY_READ);
     pCharacteristicCO2 = pService->createCharacteristic(CHARACTERISTIC_UUID_CO2, BLECharacteristic::PROPERTY_READ);
-    
-    // Crear la característica de calibración (que será de lectura/escritura en el futuro)
-    pCharacteristicCalibrate = pService->createCharacteristic(CHARACTERISTIC_UUID_CALIBRATE, BLECharacteristic::PROPERTY_READ);
+    pCharacteristicCalibrate = pService->createCharacteristic(CHARACTERISTIC_UUID_CALIBRATE,BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
+    pCharacteristicCalibrate->setCallbacks(new MyCharacteristicCallbacks());
     pCharacteristicCalibrate->setValue("READY");
 
     pService->start();
@@ -93,4 +118,13 @@ void BLEManager::updateSensorValues(float temp, float hum, float pres, int co2) 
 
 bool BLEManager::isDeviceConnected() {
     return deviceConnected;
+}
+
+String BLEManager::getCalibrationCommand() {
+    if (calibrationCommand != "") {
+        String cmd = calibrationCommand;
+        calibrationCommand = ""; // Reseteamos el comando una vez que se lee
+        return cmd;
+    }
+    return ""; // Devolvemos un string vacío si no hay comandos nuevos
 }

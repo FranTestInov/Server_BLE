@@ -1,6 +1,7 @@
 #ifndef BLE_MANAGER_H
 #define BLE_MANAGER_H
 
+#include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -19,6 +20,7 @@ public:
     void init();
     void updateSensorValues(float temp, float hum, float pres, int co2);
     bool isDeviceConnected();
+    String getCalibrationCommand();
 
 private:
     // --- Atributos ---
