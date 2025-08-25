@@ -6,6 +6,8 @@
 SensorManager::SensorManager() : dht(DHT_PIN, DHT22) {
     bmp_initialized = false;
     last_bmp_reconnect_attempt = 0;
+    preheat_start_time = 0;
+    state = PREHEATING;
 }
 
 void SensorManager::init() {
@@ -15,7 +17,13 @@ void SensorManager::init() {
     Serial2.begin(9600, SERIAL_8N1, RXD2_PIN, TXD2_PIN);
     pinMode(HD_PIN, OUTPUT);
     digitalWrite(HD_PIN, HIGH); // Asegurarse de que la calibración manual no esté activa
-
+    Serial.println("Desactivando autocalibración del sensor de CO2...");
+    byte cmd_disable_autocal[9] = {0xFF, 0x01, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    cmd_disable_autocal[8] = calculateChecksum(cmd_disable_autocal);
+    Serial2.write(cmd_disable_autocal, 9);
+    preheat_start_time = millis();
+    Serial.println("Iniciado precalentamiento de 1 minuto para el sensor de CO2.");
+    
     // Inicializar sensor de Temp/Hum (DHT22)
     dht.begin();
 
@@ -58,7 +66,7 @@ SensorData SensorManager::readAllSensors() {
         // Si NO está funcionando, le asignamos un valor de error
         currentData.pressure = -1.0; 
         
-        // E intentamos reconectar cada 5 segundos
+        // Intentamos reconectar cada 5 segundos
         if (millis() - last_bmp_reconnect_attempt > 5000) {
             last_bmp_reconnect_attempt = millis();
             Serial.println("Intentando reconectar con el sensor BMP280...");
@@ -83,6 +91,13 @@ SensorData SensorManager::readAllSensors() {
 }
 
 int SensorManager::readCO2() {
+
+    const unsigned long PREHEAT_TIME_MS = 60 * 1000UL; // 1 minuto
+    if (millis() - preheat_start_time > PREHEAT_TIME_MS) {
+        Serial.println("Precalentamiento del sensor de CO2 completado. El sensor está listo (READY).");
+        state = READY; // Cambiamos de estado
+    }
+    
     byte cmd[9] = {0xFF, 0x01, 0x86, 0, 0, 0, 0, 0, 0x79};
     Serial2.write(cmd, 9);
     
@@ -105,4 +120,19 @@ int SensorManager::readCO2() {
         Serial.println("Respuesta inválida del sensor de CO2.");
         return -1;
     }
+}
+
+/**
+ * @brief Calcula el checksum para un comando del sensor MH-Z19C.
+ * @param packet Puntero a un array de 8 bytes (los primeros 8 bytes del comando).
+ * @return El byte de checksum calculado.
+ */
+byte calculateChecksum(byte *packet) {
+    byte checksum = 0;
+    for (int i = 1; i < 8; i++) {
+        checksum += packet[i];
+    }
+    checksum = 0xFF - checksum;
+    checksum += 1;
+    return checksum;
 }

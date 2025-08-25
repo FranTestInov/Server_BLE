@@ -10,6 +10,13 @@ struct SensorData {
     float humidity;
     float pressure;
     int co2;
+    SensorState state;
+};
+
+enum SensorState {
+    PREHEATING,
+    READY,
+    CALIBRATING
 };
 
 #endif // SENSOR_MANAGER_H
@@ -43,6 +50,10 @@ private:
     Adafruit_BMP280 bmp;
 
     // --- Variables de estado ---
+    // -- BMP280 --
     bool bmp_initialized; // Flag para saber si el BMP280 está funcionando
     unsigned long last_bmp_reconnect_attempt; // Temporizador para reintentos
+    // -- MH-Z19C --
+    SensorState state; // Estado actual del sensor de CO2  
+    unsigned long preheat_start_time; // Tiempo de inicio del precalentamiento     
 };
