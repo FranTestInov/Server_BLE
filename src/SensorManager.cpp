@@ -32,7 +32,7 @@ void SensorManager::init() {
     dht.begin();
 
     // Intentamos iniciar el sensor de Presión (BMP280)
-    if (bmp.begin()) {
+    if (bmp.begin(0x76)) {
         Serial.println(F("Sensor BMP280 encontrado e inicializado."));
         bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,
                         Adafruit_BMP280::SAMPLING_X2,
@@ -44,7 +44,7 @@ void SensorManager::init() {
         // Si falla, solo mostramos una advertencia y continuamos
         Serial.println(F("ADVERTENCIA: No se pudo encontrar un sensor BMP280 válido. Se reintentará periódicamente."));
         Serial.println("Sensor ID: ");
-        Serial.println(bmp.sensorID());
+        Serial.println(bmp.sensorID(),HEX);
         bmp_initialized = false; // Marcamos como NO inicializado
     }
     
@@ -78,7 +78,7 @@ SensorData SensorManager::readAllSensors() {
             Serial.println("Intentando reconectar con el sensor BMP280...");
             Serial.println(bmp.sensorID(),16);
             // Volvemos a llamar a init() del sensor
-            if (bmp.begin()) {
+            if (bmp.begin(0x76)) {
                 Serial.println("¡BMP280 reconectado exitosamente!");
                 // Si reconecta, aplicamos la configuración de nuevo
                 bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,

@@ -17,11 +17,14 @@ BLEManager bleManager;
 SensorManager sensorManager;
 CalibrationManager calibrationManager;
 
+void scan();
+
 /**
  * @brief Configuración inicial del microcontrolador.
  * @details Inicializa la comunicación serial y todos los módulos principales.
  */
 void setup() {
+    Wire.begin(); 
     Serial.begin(115200); // Usamos una velocidad más alta para depuración
     while (!Serial); // Espera a que el puerto serial se conecte
 
@@ -31,6 +34,7 @@ void setup() {
     calibrationManager.init();
     
     Serial.println("Sistema inicializado y listo.");
+    //scan();
 }
 
 // Variables para controlar el tiempo de envío de datos
@@ -72,4 +76,37 @@ void loop() {
         // Otras tareas que necesiten ejecutarse en cada ciclo podrían ir aquí
     }
 
+}
+
+void scan() {
+    byte error, address;
+    int nDevices;
+
+    Serial.println("Escaneando...");
+    nDevices = 0;
+    for (address = 1; address < 127; address++) {
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+
+        if (error == 0) {
+            Serial.print("Dispositivo I2C encontrado en la dirección 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.println(address, HEX);
+            nDevices++;
+        } else if (error == 4) {
+            Serial.print("Error desconocido en la dirección 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.println(address, HEX);
+        }
+    }
+    if (nDevices == 0) {
+        Serial.println("No se encontraron dispositivos I2C\n");
+    } else {
+        Serial.println("Escaneo finalizado\n");
+    }
+    delay(5000); // Espera 5 segundos para el próximo escaneo
 }
