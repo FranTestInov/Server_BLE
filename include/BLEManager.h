@@ -18,7 +18,7 @@ public:
     // --- Métodos Públicos ---
     BLEManager(); // Constructor
     void init();
-    void updateSensorValues(float temp, float hum, float pres, int co2, String status);
+    void updateSensorValues(float temp, float hum, float pres, int co2);
     bool isDeviceConnected();
     String getCalibrationCommand();
 
@@ -31,7 +31,7 @@ private:
     BLECharacteristic *pCharacteristicHum;
     BLECharacteristic *pCharacteristicCO2;
     BLECharacteristic *pCharacteristicCalibrate;
-    BLECharacteristic *pCharacteristicStatus;
+    //BLECharacteristic *pCharacteristicStatus;
 };
 
 // --- Variable Externa ---

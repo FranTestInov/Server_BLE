@@ -66,7 +66,7 @@ void loop() {
             // --- Actualización del Servidor BLE ---
             // Le pasamos los datos al BLEManager para que los envíe
             if (bleManager.isDeviceConnected()) {
-                bleManager.updateSensorValues(data.temperature, data.humidity, data.pressure, data.co2, data.state);
+                bleManager.updateSensorValues(data.temperature, data.humidity, data.pressure, data.co2);
             }
         }
         // Otras tareas que necesiten ejecutarse en cada ciclo podrían ir aquí

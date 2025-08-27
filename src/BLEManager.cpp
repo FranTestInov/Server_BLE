@@ -66,7 +66,7 @@ BLEManager::BLEManager() {
     pCharacteristicHum = nullptr;
     pCharacteristicCO2 = nullptr;
     pCharacteristicCalibrate = nullptr;
-    pCharacteristicStatus = nullptr;
+    //pCharacteristicStatus = nullptr;
 }
 
 void BLEManager::init() {
@@ -87,8 +87,8 @@ void BLEManager::init() {
     pCharacteristicCalibrate->setCallbacks(new MyCharacteristicCallbacks());
     pCharacteristicCalibrate->setValue("READY");
     // Característica de estado del sensor de CO2
-    pCharacteristicStatus = pService->createCharacteristic(CHARACTERISTIC_UUID_STATUS, BLECharacteristic::PROPERTY_READ);
-    pCharacteristicStatus->setValue("PREHEATING"); // Valor inicial
+    //pCharacteristicStatus = pService->createCharacteristic(CHARACTERISTIC_UUID_STATUS, BLECharacteristic::PROPERTY_READ);
+    //pCharacteristicStatus->setValue("PREHEATING"); // Valor inicial
 
     pService->start();
 
@@ -106,20 +106,20 @@ void BLEManager::init() {
     Serial.println("Servidor BLE iniciado y publicitando...");
 }
 
-void BLEManager::updateSensorValues(float temp, float hum, float pres, int co2, String status) {
+void BLEManager::updateSensorValues(float temp, float hum, float pres, int co2) {
     if (deviceConnected) {
         // Convierte los valores a string y los asigna a las características
         String tempStr = String(temp, 2);
         String presStr = String(pres, 2);
         String humStr = String(hum, 2);
         String co2Str = String(co2);
-        String statusStr = String(status); // Aquí podrías actualizar el estado real del sensor de CO2
+        //String statusStr = String(status); // Aquí podrías actualizar el estado real del sensor de CO2
 
         pCharacteristicTemp->setValue(tempStr.c_str());
         pCharacteristicPres->setValue(presStr.c_str());
         pCharacteristicHum->setValue(humStr.c_str());
         pCharacteristicCO2->setValue(co2Str.c_str());
-        pCharacteristicStatus->setValue(statusStr.c_str());
+        //pCharacteristicStatus->setValue(statusStr.c_str());
     }
 }
 

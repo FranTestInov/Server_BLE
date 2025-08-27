@@ -2,12 +2,14 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+// Prototipo de la función
+static byte calculateChecksum(byte *packet);
+
 // Constructor: Inicializa los objetos de los sensores con sus pines
 SensorManager::SensorManager() : dht(DHT_PIN, DHT22) {
     bmp_initialized = false;
     last_bmp_reconnect_attempt = 0;
     preheat_start_time = 0;
-    state = PREHEATING;
 }
 
 void SensorManager::init() {
@@ -23,6 +25,8 @@ void SensorManager::init() {
     Serial2.write(cmd_disable_autocal, 9);
     preheat_start_time = millis();
     Serial.println("Iniciado precalentamiento de 1 minuto para el sensor de CO2.");
+    pinMode(FAN_PIN, OUTPUT);
+    digitalWrite(FAN_PIN, LOW); // Asegurarse de que el ventilador esté apagado al inicio
     
     // Inicializar sensor de Temp/Hum (DHT22)
     dht.begin();
@@ -39,6 +43,8 @@ void SensorManager::init() {
     } else {
         // Si falla, solo mostramos una advertencia y continuamos
         Serial.println(F("ADVERTENCIA: No se pudo encontrar un sensor BMP280 válido. Se reintentará periódicamente."));
+        Serial.println("Sensor ID: ");
+        Serial.println(bmp.sensorID());
         bmp_initialized = false; // Marcamos como NO inicializado
     }
     
@@ -70,6 +76,7 @@ SensorData SensorManager::readAllSensors() {
         if (millis() - last_bmp_reconnect_attempt > 5000) {
             last_bmp_reconnect_attempt = millis();
             Serial.println("Intentando reconectar con el sensor BMP280...");
+            Serial.println(bmp.sensorID(),16);
             // Volvemos a llamar a init() del sensor
             if (bmp.begin()) {
                 Serial.println("¡BMP280 reconectado exitosamente!");
@@ -94,8 +101,9 @@ int SensorManager::readCO2() {
 
     const unsigned long PREHEAT_TIME_MS = 60 * 1000UL; // 1 minuto
     if (millis() - preheat_start_time > PREHEAT_TIME_MS) {
-        Serial.println("Precalentamiento del sensor de CO2 completado. El sensor está listo (READY).");
-        state = READY; // Cambiamos de estado
+        digitalWrite(FAN_PIN, HIGH); // Encendemos el ventilador
+        Serial.println("Ventilador activado.\n");
+        Serial.println("Precalentamiento del sensor de CO2 completado. El sensor está listo (READY).\n");
     }
     
     byte cmd[9] = {0xFF, 0x01, 0x86, 0, 0, 0, 0, 0, 0x79};
@@ -122,12 +130,13 @@ int SensorManager::readCO2() {
     }
 }
 
+
 /**
  * @brief Calcula el checksum para un comando del sensor MH-Z19C.
  * @param packet Puntero a un array de 8 bytes (los primeros 8 bytes del comando).
  * @return El byte de checksum calculado.
  */
-byte calculateChecksum(byte *packet) {
+static byte calculateChecksum(byte *packet) {
     byte checksum = 0;
     for (int i = 1; i < 8; i++) {
         checksum += packet[i];
