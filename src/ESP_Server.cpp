@@ -10,6 +10,7 @@
 #include "SensorManager.h"
 #include "CalibrationManager.h"
 
+extern volatile bool toggleCoolerRequest;
 
 // --- OBJETOS GLOBALES DE LOS MÓDULOS ---
 // Creamos una instancia para cada manager que controlará una parte del sistema.
@@ -56,6 +57,11 @@ void loop() {
     // El calibrationManager se encarga de su propia máquina de estados interna.
     calibrationManager.run();
 
+    if (toggleCoolerRequest) {
+        sensorManager.setFanState(!sensorManager.getFanState()); // Alternamos el estado
+        toggleCoolerRequest = false; // Reseteamos la bandera para la próxima petición
+    }
+
     if (!calibrationManager.isCalibrating()) {
     // --- Lógica de temporización para no bloquear el procesador ---
         if (millis() - lastUpdateTime >= UPDATE_INTERVAL_MS) {
@@ -70,11 +76,23 @@ void loop() {
             // --- Actualización del Servidor BLE ---
             // Le pasamos los datos al BLEManager para que los envíe
             if (bleManager.isDeviceConnected()) {
-                bleManager.updateSensorValues(data.temperature, data.humidity, data.pressure, data.co2);
+                // Obtenemos los estados actuales desde el SensorManager
+                String systemStateStr = "UNKNOWN";
+                switch(sensorManager.getState()) {
+                    case PREHEATING: systemStateStr = "PREHEATING"; break;
+                    case READY:      systemStateStr = "READY";      break;
+                    case CALIBRATING:systemStateStr = "CALIBRATING"; break;
+                }
+
+                String coolerStateStr = sensorManager.getFanState() ? "ON" : "OFF";
+
+                // Le pasamos todos los datos, incluidos los nuevos estados, al BLEManager
+                bleManager.updateSensorValues(data.temperature, data.humidity, data.pressure, data.co2, systemStateStr, coolerStateStr);
             }
         }
         // Otras tareas que necesiten ejecutarse en cada ciclo podrían ir aquí
     }
+
 
 }
 

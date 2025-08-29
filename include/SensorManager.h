@@ -33,7 +33,10 @@ class SensorManager {
 public:
     SensorManager(); // Constructor
     void init();
-    SensorData readAllSensors();
+    SensorData readAllSensors();// Lee todos los sensores y devuelve sus datos
+    SensorState getState();     // Para obtener el estado del sensor de CO2
+    bool getFanState();         // Para saber si el ventilador está encendido
+    void setFanState(bool on);  // Para controlar el ventilador
 
 private:
     // --- Métodos Privados ---
@@ -56,5 +59,6 @@ private:
     unsigned long last_bmp_reconnect_attempt; // Temporizador para reintentos
     // -- MH-Z19C --
     SensorState state; // Estado actual del sensor de CO2  
-    unsigned long preheat_start_time; // Tiempo de inicio del precalentamiento     
+    unsigned long preheat_start_time; // Tiempo de inicio del precalentamiento
+    bool fan_state; // Estado actual del ventilador     
 };
