@@ -23,18 +23,15 @@ private:
     enum CalibrationState
     {
         IDLE,
-        STABILIZING,
         PULSING
     };
     // --- Pines y Constantes ---
     static const int HD_PIN = 12;
-    static const unsigned long STABILIZATION_TIME_MS = 20 * 60 * 1000UL; // 20 minutos
-    static const unsigned long PULSE_TIME_MS = 7000UL;                   // 7 segundos
+    static const unsigned long PULSE_TIME_MS = 7000UL; // 7 segundos
 
     // --- Variables de Estado ---
     CalibrationState currentState; // Variable que guarda el estado actual
     unsigned long stateStartTime;  // Temporizador para los estados
-    unsigned long lastLogTime;     // Temporizador para los mensajes en consola
 };
 
 #endif // CALIBRATION_MANAGER_H

@@ -36,10 +36,11 @@ class SensorManager
 public:
     SensorManager(); // Constructor
     void init();
-    SensorData readAllSensors(); // Lee todos los sensores y devuelve sus datos
-    SensorState getState();      // Para obtener el estado del sensor de CO2
-    bool getFanState();          // Para saber si el ventilador está encendido
-    void setFanState(bool on);   // Para controlar el ventilador
+    SensorData readAllSensors();               // Lee todos los sensores y devuelve sus datos
+    SensorState getState();                    // Para obtener el estado del sensor de CO2
+    bool getFanState();                        // Para saber si el ventilador está encendido
+    void setFanState(bool on);                 // Para controlar el ventilador
+    void setSystemState(SensorState newState); // Para actualizar el estado del sistema
 
 private:
     // --- Métodos Privados ---

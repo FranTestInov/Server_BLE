@@ -19,7 +19,6 @@ CalibrationManager::CalibrationManager()
 {
     currentState = IDLE;
     stateStartTime = 0;
-    lastLogTime = 0;
 }
 
 /**
@@ -46,9 +45,9 @@ void CalibrationManager::startCalibration()
     if (currentState == IDLE)
     {
         Serial.println("Comando de calibración recibido. Iniciando fase de estabilización (20 min)...");
-        currentState = STABILIZING;
+        currentState = PULSING;
         stateStartTime = millis();
-        lastLogTime = stateStartTime;
+        digitalWrite(HD_PIN, LOW);
     }
 }
 
@@ -76,37 +75,6 @@ void CalibrationManager::run()
     case IDLE:
         // No se realiza ninguna acción.
         break;
-
-    /**
-     * @brief Estado de estabilización. El sistema espera 20 minutos antes de
-     * activar el pulso de calibración para asegurar que el sensor esté en
-     * un ambiente estable de 400 ppm.
-     */
-    case STABILIZING:
-    {
-        unsigned long now = millis();
-        unsigned long elapsed = now - stateStartTime;
-
-        // Cada 10 segundos, informa el tiempo restante por el monitor serie.
-        if (now - lastLogTime >= 10000)
-        {
-            Serial.print("Estabilizando... quedan ");
-            Serial.print((STABILIZATION_TIME_MS - elapsed) / 1000);
-            Serial.println(" segundos.");
-            lastLogTime = now;
-        }
-
-        // Cuando se completan los 20 minutos, pasa al estado de PULSING.
-        if (elapsed >= STABILIZATION_TIME_MS)
-        {
-            Serial.println("Estabilización completada. Iniciando pulso de calibración (7 seg)...");
-            currentState = PULSING;
-            stateStartTime = millis();
-            // Pone el pin HD en BAJO para iniciar el pulso de calibración.
-            digitalWrite(HD_PIN, LOW);
-        }
-        break;
-    }
 
     /**
      * @brief Estado de pulso de calibración. El pin HD se mantiene en BAJO

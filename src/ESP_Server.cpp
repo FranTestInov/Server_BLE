@@ -11,6 +11,7 @@
 #include "CalibrationManager.h"
 
 extern volatile bool toggleCoolerRequest;
+bool wasCalibrating = false;
 
 // --- OBJETOS GLOBALES DE LOS MÓDULOS ---
 // Creamos una instancia para cada manager que controlará una parte del sistema.
@@ -56,10 +57,17 @@ void loop()
     if (cmd == "START_CAL")
     { // Usamos un comando más descriptivo
         calibrationManager.startCalibration();
+        sensorManager.setSystemState(CALIBRATING);
     }
 
     // El calibrationManager se encarga de su propia máquina de estados interna.
     calibrationManager.run();
+
+    if (wasCalibrating && !calibrationManager.isCalibrating())
+    {
+        sensorManager.setSystemState(READY); // Volver al estado READY
+    }
+    wasCalibrating = calibrationManager.isCalibrating(); // Actualizar el estado para el próximo ciclo.
 
     if (toggleCoolerRequest)
     {
