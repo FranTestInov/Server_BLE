@@ -15,19 +15,19 @@
 
 /** @def SERVICE_UUID
  * @brief UUID principal del servicio BLE que agrupa todas las características. */
-#define SERVICE_UUID                  "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 /** @def CHARACTERISTIC_UUID_TMP
  * @brief UUID para la característica de temperatura (lectura). */
-#define CHARACTERISTIC_UUID_TMP       "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_TMP "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 /** @def CHARACTERISTIC_UUID_PRES
  * @brief UUID para la característica de presión (lectura). */
-#define CHARACTERISTIC_UUID_PRES      "cba1d466-344c-4be3-ab3f-189f80dd7518"
+#define CHARACTERISTIC_UUID_PRES "cba1d466-344c-4be3-ab3f-189f80dd7518"
 /** @def CHARACTERISTIC_UUID_HUM
  * @brief UUID para la característica de humedad (lectura). */
-#define CHARACTERISTIC_UUID_HUM       "d2b2d3e1-36e1-4688-b7f5-ea07361b26a8"
+#define CHARACTERISTIC_UUID_HUM "d2b2d3e1-36e1-4688-b7f5-ea07361b26a8"
 /** @def CHARACTERISTIC_UUID_CO2
  * @brief UUID para la característica de CO2 (lectura). */
-#define CHARACTERISTIC_UUID_CO2       "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+#define CHARACTERISTIC_UUID_CO2 "a1b2c3d4-5678-90ab-cdef-1234567890ab"
 /** @def CHARACTERISTIC_UUID_CALIBRATE
  * @brief UUID para la característica de calibración (lectura/escritura). */
 #define CHARACTERISTIC_UUID_CALIBRATE "12345678-1234-1234-1234-123456789abc"
@@ -53,12 +53,14 @@ volatile bool toggleCoolerRequest = false;
  * @details Esta clase hereda de `BLEServerCallbacks` para implementar
  * comportamiento personalizado cuando un cliente se conecta o desconecta.
  */
-class MyServerCallbacks : public BLEServerCallbacks {
+class MyServerCallbacks : public BLEServerCallbacks
+{
     /**
      * @brief Método llamado cuando un cliente BLE se conecta.
      * @param pServer Puntero al servidor BLE.
      */
-    void onConnect(BLEServer *pServer) {
+    void onConnect(BLEServer *pServer)
+    {
         deviceConnected = true;
         Serial.println("Dispositivo conectado");
     }
@@ -67,7 +69,8 @@ class MyServerCallbacks : public BLEServerCallbacks {
      * @brief Método llamado cuando un cliente BLE se desconecta.
      * @param pServer Puntero al servidor BLE.
      */
-    void onDisconnect(BLEServer *pServer) {
+    void onDisconnect(BLEServer *pServer)
+    {
         deviceConnected = false;
         Serial.println("Dispositivo desconectado");
         pServer->startAdvertising(); // Reinicia la publicidad para permitir nuevas conexiones.
@@ -82,16 +85,20 @@ String calibrationCommand = "";
  * @class MyCharacteristicCallbacks
  * @brief Gestiona los eventos de escritura en la característica de calibración.
  */
-class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
+class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
+{
     /**
      * @brief Se ejecuta cuando un cliente BLE escribe en la característica de calibración.
      * @param pCharacteristic Puntero a la característica que fue escrita.
      */
-    void onWrite(BLECharacteristic *pCharacteristic) {
+    void onWrite(BLECharacteristic *pCharacteristic)
+    {
         std::string value = pCharacteristic->getValue();
-        if (value.length() > 0) {
+        if (value.length() > 0)
+        {
             calibrationCommand = ""; // Limpia el comando anterior.
-            for (int i = 0; i < value.length(); i++) {
+            for (int i = 0; i < value.length(); i++)
+            {
                 calibrationCommand += value[i];
             }
             Serial.print("Comando de calibración recibido: ");
@@ -104,14 +111,16 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
  * @class CoolerCharacteristicCallbacks
  * @brief Gestiona los eventos de escritura en la característica del ventilador.
  */
-class CoolerCharacteristicCallbacks : public BLECharacteristicCallbacks {
+class CoolerCharacteristicCallbacks : public BLECharacteristicCallbacks
+{
     /**
      * @brief Se ejecuta cuando un cliente BLE escribe en la característica del ventilador.
      * @details Cualquier escritura activa el flag `toggleCoolerRequest` para que
      * el bucle principal procese la solicitud de cambio de estado.
      * @param pCharacteristic Puntero a la característica que fue escrita.
      */
-    void onWrite(BLECharacteristic *pCharacteristic) {
+    void onWrite(BLECharacteristic *pCharacteristic)
+    {
         toggleCoolerRequest = true;
         Serial.println("Solicitud para alternar el estado del cooler recibida vía BLE.");
     }
@@ -121,7 +130,8 @@ class CoolerCharacteristicCallbacks : public BLECharacteristicCallbacks {
  * @brief Constructor de la clase BLEManager.
  * @details Inicializa todos los punteros de objetos BLE a `nullptr`.
  */
-BLEManager::BLEManager() {
+BLEManager::BLEManager()
+{
     pServer = nullptr;
     pCharacteristicTemp = nullptr;
     pCharacteristicPres = nullptr;
@@ -138,9 +148,10 @@ BLEManager::BLEManager() {
  * características con sus propiedades y callbacks correspondientes.
  * Finalmente, inicia la publicidad BLE.
  */
-void BLEManager::init() {
+void BLEManager::init()
+{
     BLEDevice::init("SRV_NAME");
-    
+
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
 
@@ -151,14 +162,14 @@ void BLEManager::init() {
     pCharacteristicPres = pService->createCharacteristic(CHARACTERISTIC_UUID_PRES, BLECharacteristic::PROPERTY_READ);
     pCharacteristicHum = pService->createCharacteristic(CHARACTERISTIC_UUID_HUM, BLECharacteristic::PROPERTY_READ);
     pCharacteristicCO2 = pService->createCharacteristic(CHARACTERISTIC_UUID_CO2, BLECharacteristic::PROPERTY_READ);
-    
+
     pCharacteristicCalibrate = pService->createCharacteristic(CHARACTERISTIC_UUID_CALIBRATE, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
     pCharacteristicCalibrate->setCallbacks(new MyCharacteristicCallbacks());
     pCharacteristicCalibrate->setValue("READY");
-    
+
     pCharacteristicSystemState = pService->createCharacteristic(CHARACTERISTIC_UUID_SYSTEM_STATE, BLECharacteristic::PROPERTY_READ);
     pCharacteristicSystemState->setValue("PREHEATING");
-    
+
     pCharacteristicCoolerState = pService->createCharacteristic(CHARACTERISTIC_UUID_COOLER_STATE, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
     pCharacteristicCoolerState->setCallbacks(new CoolerCharacteristicCallbacks());
     pCharacteristicCoolerState->setValue("OFF");
@@ -175,7 +186,7 @@ void BLEManager::init() {
     BLEAdvertisementData scanResponseData;
     scanResponseData.setCompleteServices(pService->getUUID());
     pAdvertising->setScanResponseData(scanResponseData);
-    
+
     BLEDevice::startAdvertising();
     Serial.println("Servidor BLE iniciado y publicitando...");
 }
@@ -192,8 +203,10 @@ void BLEManager::init() {
  * @param systemStatus Estado actual del sistema (ej. "PREHEATING").
  * @param coolerStatus Estado actual del ventilador (ej. "ON").
  */
-void BLEManager::updateSensorValues(float temp, float hum, float pres, int co2, String systemStatus, String coolerStatus) {
-    if (deviceConnected) {
+void BLEManager::updateSensorValues(float temp, float hum, float pres, int co2, String systemStatus, String coolerStatus)
+{
+    if (deviceConnected)
+    {
         String tempStr = String(temp, 2);
         String presStr = String(pres, 2);
         String humStr = String(hum, 2);
@@ -212,7 +225,8 @@ void BLEManager::updateSensorValues(float temp, float hum, float pres, int co2, 
  * @brief Verifica si hay un cliente BLE conectado.
  * @return bool `true` si un dispositivo está conectado, `false` en caso contrario.
  */
-bool BLEManager::isDeviceConnected() {
+bool BLEManager::isDeviceConnected()
+{
     return deviceConnected;
 }
 
@@ -221,8 +235,10 @@ bool BLEManager::isDeviceConnected() {
  * @details Devuelve el comando y lo limpia para evitar procesarlo múltiples veces.
  * @return String El comando de calibración, o un string vacío si no hay ninguno nuevo.
  */
-String BLEManager::getCalibrationCommand() {
-    if (calibrationCommand != "") {
+String BLEManager::getCalibrationCommand()
+{
+    if (calibrationCommand != "")
+    {
         String cmd = calibrationCommand;
         calibrationCommand = ""; // Resetea el comando una vez leído.
         return cmd;

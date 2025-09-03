@@ -5,15 +5,17 @@
  * @struct SensorData
  * @brief Una estructura simple para contener todas las lecturas de los sensores.
  */
-struct SensorData {
+struct SensorData
+{
     float temperature;
     float humidity;
     float pressure;
     int co2;
-    //SensorState state;
+    // SensorState state;
 };
 
-enum SensorState {
+enum SensorState
+{
     PREHEATING,
     READY,
     CALIBRATING
@@ -29,14 +31,15 @@ enum SensorState {
  * @class SensorManager
  * @brief Gestiona la inicialización y lectura de todos los sensores del PCB1.
  */
-class SensorManager {
+class SensorManager
+{
 public:
     SensorManager(); // Constructor
     void init();
-    SensorData readAllSensors();// Lee todos los sensores y devuelve sus datos
-    SensorState getState();     // Para obtener el estado del sensor de CO2
-    bool getFanState();         // Para saber si el ventilador está encendido
-    void setFanState(bool on);  // Para controlar el ventilador
+    SensorData readAllSensors(); // Lee todos los sensores y devuelve sus datos
+    SensorState getState();      // Para obtener el estado del sensor de CO2
+    bool getFanState();          // Para saber si el ventilador está encendido
+    void setFanState(bool on);   // Para controlar el ventilador
 
 private:
     // --- Métodos Privados ---
@@ -55,10 +58,10 @@ private:
 
     // --- Variables de estado ---
     // -- BMP280 --
-    bool bmp_initialized; // Flag para saber si el BMP280 está funcionando
+    bool bmp_initialized;                     // Flag para saber si el BMP280 está funcionando
     unsigned long last_bmp_reconnect_attempt; // Temporizador para reintentos
     // -- MH-Z19C --
-    SensorState state; // Estado actual del sensor de CO2  
+    SensorState state;                // Estado actual del sensor de CO2
     unsigned long preheat_start_time; // Tiempo de inicio del precalentamiento
-    bool fan_state; // Estado actual del ventilador     
+    bool fan_state;                   // Estado actual del ventilador
 };

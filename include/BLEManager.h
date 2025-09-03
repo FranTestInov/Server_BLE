@@ -13,7 +13,8 @@
  * * Esta clase encapsula la creación del servidor, servicios, características,
  * y la actualización de los valores de los sensores.
  */
-class BLEManager {
+class BLEManager
+{
 public:
     // --- Métodos Públicos ---
     BLEManager(); // Constructor
