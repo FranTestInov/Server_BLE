@@ -42,6 +42,8 @@ void SensorManager::init()
     // --- Inicialización del sensor de CO2 (MH-Z19C) ---
     // Inicia comunicación UART en el puerto Serial2.
     Serial2.begin(9600, SERIAL_8N1, RXD2_PIN, TXD2_PIN);
+    while (!Serial2)
+        ; // Espera a que se conecte con el sensor de CO2
 
     // Configura el pin HD para la calibración manual y lo pone en ALTO (inactivo).
     pinMode(HD_PIN, OUTPUT);
@@ -165,6 +167,8 @@ int SensorManager::readCO2()
         state = READY;
     }
 
+    // Hacer la funcion que consulta el sensor de CO2,
+    // para poder ejecutarla para sacar la maquina de estados del PREHEATING
     // Comando para solicitar la lectura de CO2.
     byte cmd[9] = {0xFF, 0x01, 0x86, 0, 0, 0, 0, 0, 0x79};
     Serial2.write(cmd, 9);

@@ -47,10 +47,10 @@ private:
     int readCO2(); // Función de ayuda interna para leer el sensor de CO2
 
     // --- Pines y Definiciones ---
-    static const int FAN_PIN = 26; // Pin para el ventilador del sensor de CO2
-    static const int DHT_PIN = 25;
-    static const int HD_PIN = 12;
-    static const int RXD2_PIN = 16;
+    static const int FAN_PIN = 26;  // Pin para el ventilador del sensor de CO2
+    static const int DHT_PIN = 25;  // Pin para el sensor DHT22
+    static const int HD_PIN = 12;   // Pin para el control de cero del MH-Z19C
+    static const int RXD2_PIN = 16; // UART
     static const int TXD2_PIN = 17;
 
     // --- Objetos de Sensores ---

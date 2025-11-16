@@ -19,7 +19,7 @@ BLEManager bleManager;
 SensorManager sensorManager;
 CalibrationManager calibrationManager;
 
-void scan();
+// void scan(); // Funcion de escaneo de todos los dispositivos I2C conectados
 
 /**
  * @brief Configuración inicial del microcontrolador.
@@ -38,12 +38,12 @@ void setup()
     calibrationManager.init();
 
     Serial.println("Sistema inicializado y listo.");
-    // scan();
+    // scan(); // Funcion que sirve para escanear todos los dispositivos I2C conectados
 }
 
 // Variables para controlar el tiempo de envío de datos
 unsigned long lastUpdateTime = 0;
-const int UPDATE_INTERVAL_MS = 500; // Intervalo de 500ms = 2 datos por segundo
+const int UPDATE_INTERVAL_MS = 1000; // Intervalo de datos 1 segundo
 
 /**
  * @brief Bucle principal del programa.
@@ -72,7 +72,7 @@ void loop()
     if (toggleCoolerRequest)
     {
         sensorManager.setFanState(!sensorManager.getFanState()); // Alternamos el estado
-        toggleCoolerRequest = false;                             // Reseteamos la bandera para la próxima petición
+        toggleCoolerRequest = false;                             // Reseteamos la bandera para la pró xima petición
     }
 
     if (!calibrationManager.isCalibrating())
