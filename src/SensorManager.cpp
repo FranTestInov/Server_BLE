@@ -42,8 +42,7 @@ void SensorManager::init()
     // --- Inicialización del sensor de CO2 (MH-Z19C) ---
     // Inicia comunicación UART en el puerto Serial2.
     Serial2.begin(9600, SERIAL_8N1, RXD2_PIN, TXD2_PIN);
-    while (!Serial2)
-        ; // Espera a que se conecte con el sensor de CO2
+    delay(2000); // Espera a que se conecte con el sensor de CO2
 
     // Configura el pin HD para la calibración manual y lo pone en ALTO (inactivo).
     pinMode(HD_PIN, OUTPUT);
@@ -165,13 +164,19 @@ int SensorManager::readCO2()
         setFanState(true); // Enciende el ventilador
         Serial.println("Precalentamiento del sensor de CO2 completado. El sensor está listo (READY).");
         state = READY;
+        return -1;
     }
 
-    // Hacer la funcion que consulta el sensor de CO2,
-    // para poder ejecutarla para sacar la maquina de estados del PREHEATING
+    while (Serial2.available() > 0)
+    {
+        Serial2.read(); // Leemos y descartamos
+    }
+
     // Comando para solicitar la lectura de CO2.
     byte cmd[9] = {0xFF, 0x01, 0x86, 0, 0, 0, 0, 0, 0x79};
     Serial2.write(cmd, 9);
+
+    // cmd_disable_autocal[8] = calculateChecksum(cmd_disable_autocal);
 
     // Espera la respuesta del sensor con un timeout.
     unsigned long startTime = millis();
@@ -195,6 +200,12 @@ int SensorManager::readCO2()
     }
     else
     {
+        for (int i = 0; i < 9; i++)
+        {
+            Serial.print(response[i], HEX);
+            Serial.print(" ");
+        }
+        Serial.println();
         Serial.println("Respuesta inválida del sensor de CO2.");
         return -1;
     }
